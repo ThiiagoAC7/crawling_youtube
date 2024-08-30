@@ -4,12 +4,12 @@ Crawling youtube data
 
 ## Dataset structure
 ```
-data/
-└──youtubers_list.json
-└──{youtuber_channel_name}
-    │
-    └──videos_list.json
-    └──videos_comments.json
+    data/
+    └──youtubers_list.json
+    └──{youtuber_channel_name}
+        └──videos_list.json
+        └──comments/
+            └──{video_id}_comments.json
 ```
 ### params
 - Youtubers list:
