@@ -1,5 +1,8 @@
 import json
 
+"""
+parsing responses from youtube data api
+"""
 
 def _parse_json(request):
     return json.dumps(request, indent=4)
@@ -11,7 +14,7 @@ def save_data_to_json(data, path):
         f.write(_parse_json(data))
 
 
-def parse_comment_threads(response, video_id, video_title):
+def parse_comment_threads(response, video_id, video_title, path):
     items = response["items"]
     comments_data = {}
     # comments_data["nextPageToken"] = response["nextPageToken"] # todo: fix 
@@ -31,8 +34,36 @@ def parse_comment_threads(response, video_id, video_title):
 
         comments_data["comments"].append(_comment)
 
-    return comments_data
+        if int(i["snippet"]["totalReplyCount"]) > 0:
+            parse_replies(i["replies"], tlc["id"], path)
 
+
+    _path = f"{path+'/comments/'}{video_id}_comments.json"
+    print(f"        got comments, saving at {_path}")
+    save_data_to_json(comments_data, _path)
+
+def parse_replies(replies, parent_id, path):
+    subcomments = replies["comments"]
+
+    replies_data = {}
+    replies_data["parent_comment"] = parent_id 
+    replies_data["replies"] = []
+
+    for s in subcomments:
+        _subcomment = {}
+        _subcomment["reply_id"] = s["id"]
+        _subcomment["reply_text"] = s["snippet"]["textDisplay"]
+        _subcomment["reply_parent_comment_id"] = s["snippet"]["parentId"]
+        _subcomment["reply_author_name"] = s["snippet"]["authorDisplayName"]
+        _subcomment["reply_author_channel_id"] = s["snippet"]["authorChannelId"]["value"]
+        _subcomment["reply_like_count"] = s["snippet"]["likeCount"]
+        _subcomment["reply_publish_date"] = s["snippet"]["publishedAt"]
+
+        replies_data["replies"].append(_subcomment)
+
+    _path = f"{path+'/replies/'}{parent_id}_comments.json"
+    print(f"        got replies, saving at {_path}")
+    save_data_to_json(replies_data, _path)
 
 def parse_search_videos(response, channel):
     videos_data = {}

@@ -10,6 +10,8 @@ Crawling youtube data
         └──videos_list.json
         └──comments/
             └──{video_id}_comments.json
+            └──replies/
+                └──{comment_id}_comments.json
 ```
 ### params
 - Youtubers list:
@@ -33,6 +35,9 @@ Crawling youtube data
     - date_published: date
     - video_title: title
     - comments:
-        - to be defined... 
-
-
+        - comment_id: comment id
+        - comment_text: text of the comment as its shown
+        - comment_author_name: author's channel handle
+        - comment_author_channel_id: author's channel id 
+        - comment_like_count: number of likes comment has 
+        - comment_publish_date: when comment was published 
