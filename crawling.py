@@ -3,18 +3,17 @@ import json
 import googleapiclient.discovery
 from constants import YTBRS_LIST, PATH, YOUTUBERS_PATH, DEVELOPER_KEY
 import googleapiclient.errors
+import pandas as pd
 
-from utils import parse_comment_threads, parse_search_videos, parse_replies
-from utils import parse_channel_info, save_data_to_json
+from utils import *
 
 """
-TODO: 
-1. add "crawled" bool param to videos.json list
-  change code to crawl videos comments if crawled=false
-2. try the nextPageToken param, will need to change some stuff
-3. remove dicts, use proper data structure. 
-4. save data to some non relational db (?)
+1. import data as json from pandas OR
+2. change to save as .csv 
+- YOUTUBERS:
+    - Controversos X Nao controversos
 """
+
 
 class Crawling:
 
@@ -78,6 +77,7 @@ class Crawling:
             print(
                 f"Crawling info from : {channel['channel_title']}, @{channel['youtuber']} ...")
 
+            # get only videos by channel id
             request = self.youtube.search().list(
                 part="snippet",
                 channelId=channel["channel_id"],
@@ -87,13 +87,12 @@ class Crawling:
             )
 
             response = request.execute()
-            videos_data = parse_search_videos(response, channel)
 
-            os.makedirs(PATH+channel['youtuber'], exist_ok=True)
-            _path = f"{PATH}{channel['youtuber']}/videos_list.json"
-            save_data_to_json(videos_data, _path)
+            _path = PATH+channel['youtuber']
+            os.makedirs(_path, exist_ok=True)
+            parse_search_videos(response, channel, _path)
 
-    def build_videos_comments_list(self):
+    def build_videos_comments_df(self):
         datasets = self._get_youtuber_datasets_path()
 
         # get each youtuber's videos dataset
@@ -102,14 +101,14 @@ class Crawling:
             with open(path+"videos_list.json") as f:
                 video_data = json.load(f)
 
+            # print(video_data["videos"])
+
             print(
                 f"crawling comments from {video_data['channel_title']}'s videos")
 
             # creating folder structure, doesnt override if exists
             os.makedirs(path+"/comments", exist_ok=True)
-            os.makedirs(path+"/replies", exist_ok=True)
 
-            # iterates through each video
             self._get_comments_from_video_ids(video_data["videos"],
                                               path)
 
@@ -134,6 +133,7 @@ class Crawling:
         - videos: videos list, with video_id, date, video_title
         - path: current youtuber path, i.e ./data/{youtuber}/
         """
+        df = pd.DataFrame()
         for v in videos:
             print(f"    comments from {v['video_title']}")
 
@@ -150,22 +150,26 @@ class Crawling:
                 response = request.execute()
             except googleapiclient.errors.HttpError as e:
                 if e.error_details[0]["reason"] == "commentsDisabled":
-                    print(f"skipping current video: {e.error_details[0]['message']}")
+                    print( f"skipping current video: {e.error_details[0]['message']}")
 
             # parses response, with selected params
             if response:
-                parse_comment_threads(
+                print(f"    parsing comments and appending to dataframe")
+                _d = parse_comment_threads(
                     response,
                     v["video_id"],
                     v["video_title"],
                     path
                 )
+                df = pd.concat([df, pd.DataFrame(_d)], ignore_index=True)
+        print(f"saving...")
+        df.to_csv(f'{path}_comments.csv')
 
 
 def main():
     craw = Crawling()
-    # crw.build_youtubers_videos_list()
-    craw.build_videos_comments_list()
+    # craw.build_youtubers_videos_list()
+    craw.build_videos_comments_df()
 
 
 if __name__ == "__main__":

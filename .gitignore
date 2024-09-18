@@ -4,3 +4,5 @@ client_secret.json
 
 .test/
 data/
+
+.ipynb_checkpoints/

@@ -5,14 +5,6 @@ import os
 YTBRS_LIST = [
     "felipeneto",
     "enaldinho",
-    # "luccastoon",
-    # "Luccasneto",
-    # "ROXTEEN",
-    # "Luccastoonkids",
-    # "rezendeevil",
-    # "AuthenticGames",
-    # "HDDaviGamer",
-    # "viniccius13",
 ]
 
 # data paths
