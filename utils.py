@@ -17,6 +17,7 @@ def save_data_to_json(data, path):
 def parse_comment_threads(response, video_id, video_title, path):
     items = response["items"]
     comments_data = []
+    comments_many_replies_ids = [] # comments with more than 5 replies
 
     for i in items:
         tlc = i["snippet"]["topLevelComment"]
@@ -35,17 +36,18 @@ def parse_comment_threads(response, video_id, video_title, path):
 
         comments_data.append(_comment)
 
-        if int(i["snippet"]["totalReplyCount"]) > 0:
-            comments_data += parse_replies(i["replies"], tlc["id"], path, video_id, video_title)
+        reply_count = int(i["snippet"]["totalReplyCount"])
+        if reply_count > 0 and reply_count <= 5 : # pra economizar requests
+            comments_data += parse_replies(i["replies"], tlc["id"], video_id, video_title)
+        elif reply_count > 5:
+            comments_many_replies_ids.append(tlc["id"])
 
+    return comments_data, comments_many_replies_ids
 
-    # _path = f"{path+'/comments/'}{video_id}_comments.json"
-    # print(f"        got comments, saving at {_path}")
-    # save_data_to_json(comments_data, _path)
-    return comments_data
-
-def parse_replies(replies, parent_id, path, video_id, video_title):
-    subcomments = replies["comments"]
+def parse_replies(replies, parent_id, video_id, video_title, many=False):
+    subcomments = replies.get("comments")
+    if many:
+        subcomments = replies.get("items")
 
     subcomments_data = []
     
