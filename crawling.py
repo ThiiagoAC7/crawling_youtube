@@ -111,6 +111,7 @@ class Crawling:
 
             self._get_comments_from_video_ids(video_data["videos"],
                                               path)
+            input(">")
 
     def _get_youtuber_datasets_path(self):
         """
@@ -134,34 +135,46 @@ class Crawling:
         - path: current youtuber path, i.e ./data/{youtuber}/
         """
         df = pd.DataFrame()
+        page_token = None
+        _count = 0  # comment page counter
         for v in videos:
             print(f"    comments from {v['video_title']}")
 
-            # gets comment from current video v
-            request = self.youtube.commentThreads().list(
-                part="snippet,replies,id",
-                videoId=v["video_id"],
-                maxResults=100,
-                order="relevance",
-            )
-
-            response = {}
-            try:
-                response = request.execute()
-            except googleapiclient.errors.HttpError as e:
-                if e.error_details[0]["reason"] == "commentsDisabled":
-                    print( f"skipping current video: {e.error_details[0]['message']}")
-
-            # parses response, with selected params
-            if response:
-                print(f"    parsing comments and appending to dataframe")
-                _d = parse_comment_threads(
-                    response,
-                    v["video_id"],
-                    v["video_title"],
-                    path
+            while True:  # to get next pages if nextPageToken != None
+                _count = 1
+                # gets comment from current video v
+                request = self.youtube.commentThreads().list(
+                    part="snippet,replies,id",
+                    videoId=v["video_id"],
+                    maxResults=100,
+                    pageToken=page_token,
+                    order="relevance",
                 )
-                df = pd.concat([df, pd.DataFrame(_d)], ignore_index=True)
+
+                response = {}
+                try:
+                    response = request.execute()
+                except googleapiclient.errors.HttpError as e:
+                    if e.error_details[0]["reason"] == "commentsDisabled":
+                        print(
+                            f"skipping current video: {e.error_details[0]['message']}")
+
+                # parses response, with selected params
+                if response:
+                    print(f"    parsing comments and appending to dataframe, page {_count}")
+                    _d = parse_comment_threads(
+                        response,
+                        v["video_id"],
+                        v["video_title"],
+                        path
+                    )
+                    df = pd.concat([df, pd.DataFrame(_d)], ignore_index=True)
+
+                page_token = response.get("nextPageToken")
+                if not page_token:  # if next comment page doesnt exist, break
+                    break
+                _count += 1
+
         print(f"saving...")
         df.to_csv(f'{path}_comments.csv')
 
