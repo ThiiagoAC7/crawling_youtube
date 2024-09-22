@@ -1,4 +1,5 @@
 {
     "reportArgumentType" : false,
     "reportAttributeAccessIssue": false,
+    "reportOperatorIssue": false,
 }
