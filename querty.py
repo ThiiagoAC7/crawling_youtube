@@ -1,8 +1,7 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 
-from build_graph import YTBR_NAME
-from faint import get_subgraph_with_threshold, load_graph
+from faint import load_graph
 
 
 def plot_co_commenter_graph(G):
@@ -22,7 +21,8 @@ def plot_co_commenter_graph(G):
     plt.title("Co-commenter Network")
     plt.axis('off')  # Turn off the axis
     print('sarvano ...')
-    plt.savefig(f"./data/{ytbr}/co_commenter_network_thresh_3.png")
+    # plt.show()
+    plt.savefig(f"./data/{ytbr}/co_commenter_network_thresh_10.png")
     print('sarvado')
 
 
@@ -60,7 +60,7 @@ ytbr = "felipeneto"
 def main():
     co_commenter_path = f'./data/{ytbr}/co_commenter_network.pickle'
     vid_commenter_path = f'./data/{ytbr}/video_commenter_network.pickle'
-    # G = load_graph(co_commenter_path, filter=True, threshold=3, n=5000)
+    # G = load_graph(co_commenter_path, filter=True, threshold=17, n=10000)
     # plot_co_commenter_graph(G)
     G = load_graph(vid_commenter_path, 
                    filter=True)

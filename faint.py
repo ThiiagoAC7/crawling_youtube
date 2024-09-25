@@ -56,7 +56,7 @@ def load_graph(path, filter=False, threshold=1, n=10000):
     G = pickle.load(open(path, 'rb'))
     if filter:
         return filter_graph_for_visualization(G, 
-                                              min_degree=threshold, 
+                                              # min_degree=threshold, 
                                               top_n_nodes=n,
                                               min_edge_weight=threshold)
     print(f"Graph Nodes: {G.number_of_nodes()}")
@@ -117,21 +117,24 @@ def plot_elbow_point(path):
     plt.xlabel('Threshold', fontsize=12)
     plt.ylabel('Clustering Coefficient', fontsize=12)
 
-    plt.xticks(ticks=range(1, 11))
+    plt.xticks(ticks=range(1, 26))
 
     for i, txt in enumerate(df['coef_value']):
         plt.text(df['threshold'][i], df['coef_value'][i], f'{txt:.3f}', fontsize=10, ha='center')
 
     plt.grid(True)
-    plt.show()
+    # plt.show()
+    plt.savefig(f"./data/{ytbr}/imgs/clustering_coef_x_treshold25.png")
 
 def main(path):
-    threshold = 10
-    G = get_subgraph_with_threshold(load_graph(path), threshold)
-    _path = './data/enaldinho/co_commenter_net_threshold.csv'
-    calc_clustering_coef(G, threshold, _path)
+    # threshold = 20
+    for threshold in range(11,26):
+        G = get_subgraph_with_threshold(load_graph(path), threshold)
+        _path = f'./data/{ytbr}/co_commenter_net_threshold.csv'
+        calc_clustering_coef(G, threshold, _path)
 
+ytbr = "felipeneto"
 if __name__ == "__main__":
-    path = './data/enaldinho/co_commenter_network.pickle'
-    main(path)
-    # plot_elbow_point("./data/enaldinho/co_commenter_net_threshold.csv")
+    path = f'./data/{ytbr}/co_commenter_network.pickle'
+    # main(path)
+    plot_elbow_point(f"./data/{ytbr}/co_commenter_net_threshold.csv")
