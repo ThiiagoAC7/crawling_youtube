@@ -4,10 +4,7 @@ import pandas as pd
 from tqdm import tqdm
 from itertools import combinations
 
-
-YTBR_NAME = "enaldinho"
-PATH = f"./data/{YTBR_NAME}/"
-DATA = f"{PATH}comments.csv"
+from constants import CURR_YTBR, CURR_PATH
 
 
 def build_video_commenter_net(df: pd.DataFrame):
@@ -21,7 +18,7 @@ def build_video_commenter_net(df: pd.DataFrame):
         else:
             G.add_edge(video,commenter, weight=1)
 
-    pickle.dump(G, open(f'{PATH}/video_commenter_network.pickle', 'wb'))
+    pickle.dump(G, open(f'{CURR_PATH}/video_commenter_network.pickle', 'wb'))
 
 
 def build_co_commenter_net(df: pd.DataFrame):
@@ -41,14 +38,15 @@ def build_co_commenter_net(df: pd.DataFrame):
                     # edge between commenters who commented on the same video
                     G.add_edge(pair[0], pair[1], weight=1)
 
-    pickle.dump(G, open(f'{PATH}/co_commenter_network.pickle', 'wb'))
+    pickle.dump(G, open(f'{CURR_PATH}/co_commenter_network.pickle', 'wb'))
 
 
-def main():
-    df = pd.read_csv(DATA)
-    # build_co_commenter_net(df)
-    build_video_commenter_net(df)
-
-
-if __name__ == "__main__":
-    main()
+# def main():
+#     DATA = f"{CURR_PATH}comments.csv"
+#     df = pd.read_csv(DATA)
+#     # build_co_commenter_net(df)
+#     build_video_commenter_net(df)
+#
+#
+# if __name__ == "__main__":
+#     main()

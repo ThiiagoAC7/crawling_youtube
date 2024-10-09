@@ -5,7 +5,7 @@ from constants import YTBRS_LIST, PATH, YOUTUBERS_PATH, DEVELOPER_KEY
 import googleapiclient.errors
 import pandas as pd
 
-from utils import *
+from parser import *
 
 """
 1. import data as json from pandas OR

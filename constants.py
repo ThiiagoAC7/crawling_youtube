@@ -15,3 +15,8 @@ YOUTUBERS_PATH = PATH+"youtubers.json"
 # api key
 load_dotenv()
 DEVELOPER_KEY = os.getenv("API_KEY")
+
+
+# networks constants
+CURR_YTBR = "felipeneto"
+CURR_PATH = f"./data/{CURR_YTBR}/"
