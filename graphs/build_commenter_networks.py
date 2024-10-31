@@ -49,8 +49,7 @@ def build_co_commenter_net(df: pd.DataFrame, G: Optional[nx.Graph] = None) -> nx
         G = nx.Graph()
 
     #  video_ids -> list of commenters
-    grouped_df = df.groupby('video_id')[
-        'comment_author_channel_id'].apply(list)
+    grouped_df = df.groupby('video_id')['comment_author_channel_id'].apply(list)
 
     for commenters in tqdm(grouped_df, desc="building co-commenter network...", total=len(grouped_df)):
         if len(commenters) > 1:
@@ -62,17 +61,23 @@ def build_co_commenter_net(df: pd.DataFrame, G: Optional[nx.Graph] = None) -> nx
                 if not G.has_node(pair[1]):
                     G.add_node(pair[1], type="commenter")
 
+                has_edge = G.has_edge(pair[0], pair[1])
                 if G.has_edge(pair[0], pair[1]):
                     # weight increases if commenters have commented on the same video
                     G[pair[0]][pair[1]]['weight'] += 1
-                else:
+                elif not has_edge:
                     # edge between commenters who commented on the same video
                     G.add_edge(pair[0], pair[1], weight=1)
 
+    del grouped_df, df
     if graph_is_none:
         print(f"saving...")
         print(f"graph has {G.number_of_nodes()} nodes and {G.number_of_edges()} edges")
         pickle.dump(G, open(f'{CURR_PATH}/co_commenter_network.pickle', 'wb'))
+        # if save_as_edgelist:
+        #     with open(f'{CURR_PATH}/co_commenter_network_edgelist.txt', 'w') as f:
+        #         for u, v in G.edges():
+        #             f.write(f"{u} {v}\n")
     return G
 
 

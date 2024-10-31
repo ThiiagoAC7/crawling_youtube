@@ -4,7 +4,7 @@ import googleapiclient.discovery
 import googleapiclient.errors
 import pandas as pd
 
-from constants import YTBRS_LIST, PATH, YOUTUBERS_PATH, DEVELOPER_KEY
+from constants import YTBRS_LIST, CRAWLER_PATH, YOUTUBERS_PATH, DEVELOPER_KEY
 from .parser import *
 
 
@@ -19,8 +19,8 @@ class Crawling:
 
         self.yt_channel_ids = []
 
-        if not os.path.exists(PATH):
-            os.makedirs(PATH)
+        if not os.path.exists(CRAWLER_PATH):
+            os.makedirs(CRAWLER_PATH)
 
         self._build_youtube_client()
 
@@ -81,7 +81,7 @@ class Crawling:
 
             response = request.execute()
 
-            _path = PATH+channel['youtuber']
+            _path = CRAWLER_PATH+channel['youtuber']
             os.makedirs(_path, exist_ok=True)
             parse_search_videos(response, channel, _path)
 
@@ -94,11 +94,13 @@ class Crawling:
             with open(path+"videos_list.json") as f:
                 video_data = json.load(f)
 
-            print(f"crawling comments from {video_data['channel_title']}'s videos")
 
-            self._get_comments_from_video_ids(video_data["videos"],
-                                              path)
-            input(">")
+            manual = ["cadresplayer"]
+            if video_data['youtuber'] in manual:
+                print(f"crawling comments from @{video_data['youtuber']}'s videos")
+                self._get_comments_from_video_ids(video_data["videos"],
+                                                  path)
+                input(">")
 
     def _get_youtuber_datasets_path(self):
         """
@@ -107,8 +109,8 @@ class Crawling:
         data = []
 
         # getting youtuber folders
-        for item in os.listdir(PATH):
-            _item_path = os.path.join(PATH, item)
+        for item in os.listdir(CRAWLER_PATH):
+            _item_path = os.path.join(CRAWLER_PATH, item)
             if os.path.isdir(_item_path):
                 data.append(_item_path+"/")
         return data
@@ -212,13 +214,3 @@ class Crawling:
 
         print(f"saving...")
         df.to_csv(f'{path}_comments.csv')
-
-
-def main():
-    craw = Crawling()
-    # craw.build_youtubers_videos_list()
-    craw.build_videos_comments_df()
-
-
-if __name__ == "__main__":
-    main()

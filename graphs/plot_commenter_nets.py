@@ -2,6 +2,7 @@ import pickle
 import matplotlib.pyplot as plt
 import networkx as nx
 import time
+import os
 
 from constants import CURR_PATH, CURR_YTBR
 
@@ -43,10 +44,10 @@ def plot_community_graph(G, communities, figsize=(20, 16),
     plt.figure(figsize=figsize)
 
     unique_communities = list(communities)
-    colors = generate_distinct_colors(len(unique_communities))
+    colors = generate_random_colors(len(unique_communities))
 
     color_map = {}
-    for community, color in zip(unique_communities, colors):
+    for community, color in zip(unique_communities, colors.values()):
         for node in list(community):
             if color_map.get(node) == None:
                 color_map[node] = color
@@ -75,8 +76,9 @@ def plot_community_graph(G, communities, figsize=(20, 16),
     print(f"    edges drawn ... {end - start:.3f} seconds")
 
     plt.title(title)
+    os.makedirs(f"{CURR_PATH}imgs/", exist_ok=True)
     plt.savefig(
-        f"{CURR_PATH}imgs/POSrandom_{path}_communities_colored_resolution_{str(res).replace('.','_')}")
+        f"{CURR_PATH}imgs/{path}_communities_colored_")
 
 
 def get_node_type_colors(G: nx.Graph):
@@ -91,10 +93,30 @@ def get_node_type_colors(G: nx.Graph):
 
 
 def generate_random_colors(n: int):
+    """
+    returns a dict index: color
+    """
+
+    # https://matplotlib.org/stable/users/explain/colors/colormaps.html
     colors = {}
-    cmap = plt.get_cmap('tab20b', n)
-    for i in range(n):
-        colors[i] = cmap(i)
+    cmap1 = plt.get_cmap('Paired')
+    cmap2 = plt.get_cmap('Set1')
+    cmap3 = plt.get_cmap('tab10')
+
+    # triess to fill colors with paired cmap
+    for i in range(min(n, cmap1.N)):
+        colors[i] = cmap1(i / cmap1.N)
+
+    # if n > number of colors in paired, add colors from set1
+    if n > cmap1.N:
+        for i in range(cmap1.N, min(n, cmap1.N + cmap2.N)):
+            colors[i] = cmap2((i - cmap1.N) / cmap2.N)
+
+    # if n > number of colors in paired + set1, add colors from tab10
+    if n > cmap1.N + cmap2.N:
+        for i in range(cmap1.N + cmap2.N, min(n, cmap1.N + cmap2.N + cmap3.N)):
+            colors[i] = cmap3((i - cmap1.N - cmap2.N) / cmap3.N)
+
     return colors
 
 
@@ -108,43 +130,36 @@ def generate_distinct_colors(n):
 
 def filter_graph(G: nx.Graph, min_degree=1, top_n_nodes=0, min_edge_weight=1) -> nx.Graph:
     """
-    Filter a large graph by degree and edge weight.
-
+    Filter a large graph for visualization.
     Params:
     - G: networkx Graph object
     - min_degree: minimum degree for a node to be included
     - top_n_nodes: number of top nodes by degree to include
     - min_edge_weight: minimum weight for an edge to be included
-
     Return:
     - filtered_G: filtered networkx Graph object
     """
     print(f"filtering graph ...")
     if top_n_nodes == 0:
         top_n_nodes = G.number_of_nodes()
-
     # filter nodes by degree
     node_degrees = dict(G.degree())
     high_degree_nodes = [node for node,
                          degree in node_degrees.items() if degree >= min_degree]
 
-    G = G.subgraph(high_degree_nodes[:top_n_nodes]).copy()
-
-    del high_degree_nodes, node_degrees
+    subgraph = G.subgraph(high_degree_nodes[:top_n_nodes])
     # filter edges by weight
-    edges_to_remove = []
-    for u, v, data in G.edges(data=True):
-        if (G.nodes[u].get('type') == 'commenter' and G.nodes[v].get('type') == 'commenter'):
-            if data['weight'] < min_edge_weight:
-                edges_to_remove.append((u, v))
-
-    # reomve edges and isolated nodes inplace
-    G.remove_edges_from(edges_to_remove)
-    G.remove_nodes_from(list(nx.isolates(G)))
-
+    filtered_G = nx.Graph()
+    for u, v, data in subgraph.edges(data=True):
+        if u != v and data['weight'] >= min_edge_weight:  # u!=v removes self loops
+            # print(f"{G.nodes[u].get('type')},{G.nodes[v].get('type')}")
+            filtered_G.add_edge(u, v, **data)
+    filtered_G.remove_nodes_from(list(nx.isolates(filtered_G)))
     print(
-        f"    filtered graph: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges")
-    return G
+        f"    original graph: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges")
+    print(
+        f"    filtered graph: {filtered_G.number_of_nodes()} nodes, {filtered_G.number_of_edges()} edges")
+    return filtered_G
 
 
 def load_graph(path: str) -> nx.Graph:
@@ -153,9 +168,6 @@ def load_graph(path: str) -> nx.Graph:
 
     Params:
     - path: Path where graph was saved
-    - filter: Filter graph to aid in visualization
-    - threshold: edge weights thershold value
-    - n: top n nodes to show 
 
     Return:
     - G: graph 
@@ -165,25 +177,3 @@ def load_graph(path: str) -> nx.Graph:
     print(f"    graph nodes: {G.number_of_nodes()}")
     print(f"    graph edges: {G.number_of_edges()}")
     return G
-
-
-# def __plot_elbow_point(path):
-#     df = pd.read_csv(path)
-#
-#     plt.figure(figsize=(10, 6))
-#     plt.plot(df['threshold'], df['coef_value'],
-#              marker='o', linestyle='-', color='b')
-#
-#     plt.title('Clustering Coefficient vs Threshold', fontsize=14)
-#     plt.xlabel('Threshold', fontsize=12)
-#     plt.ylabel('Clustering Coefficient', fontsize=12)
-#
-#     plt.xticks(ticks=range(1, 26))
-#
-#     for i, txt in enumerate(df['coef_value']):
-#         plt.text(df['threshold'][i], df['coef_value'][i],
-#                  f'{txt:.3f}', fontsize=10, ha='center')
-#
-#     plt.grid(True)
-#     # plt.show()
-#     plt.savefig(f"{CURR_PATH}imgs/clustering_coef_x_treshold25.png")

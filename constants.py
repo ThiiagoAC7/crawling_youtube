@@ -2,14 +2,23 @@ from dotenv import load_dotenv
 import os
 
 # list of youtuber names as they appear in their channels url handle
+# https://www.viewstats.com/, justificar pelo artigo
 YTBRS_LIST = [
-    "felipeneto",
-    "enaldinho",
+    "felipeneto",      # 
+    "enaldinho",       #
+    "geleia0",         #
+    "RobinHoodGamer1", #
+    "rezendeevil",     # alguns shorts
+    "natanporai",      # alguns shorts
+    "camilaloures",    #
+    "AuthenticGames",  # alguns videos com comentarios desativados
+    "cadresplayer",    # muito pouco -> shorts (?)
+    "brancoala",       #
 ]
 
-# data paths
-PATH = "./data/"
-YOUTUBERS_PATH = PATH+"youtubers.json"
+# crawler paths
+CRAWLER_PATH = "./data/"
+YOUTUBERS_PATH = CRAWLER_PATH+"youtubers.json"
 
 
 # api key
