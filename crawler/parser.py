@@ -100,6 +100,7 @@ def parse_channel_info(response, name):
     _videos_id = items["contentDetails"]["relatedPlaylists"]["uploads"]
     _subs_count = items["statistics"]["subscriberCount"]
     _video_count = items["statistics"]["videoCount"]
+    _view_count = items["statistics"]["viewCount"]
 
     ytbr_data = {
         "youtuber": name,
@@ -108,6 +109,7 @@ def parse_channel_info(response, name):
         "uploaded_videos_id": _videos_id,
         "num_subs": _subs_count,
         "num_videos": _video_count,
+        "num_views": _view_count,
     }
 
     return ytbr_data

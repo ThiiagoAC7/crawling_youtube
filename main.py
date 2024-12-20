@@ -28,7 +28,7 @@ def save_graph_metrics(G: nx.Graph, communities, res):
 
     df = pd.DataFrame([metrics])
     os.makedirs(f"{CURR_PATH}metrics/", exist_ok=True)
-    df.to_csv(f"{CURR_PATH}metrics/commenter_network_metrics.csv")
+    df.to_csv(f"{CURR_PATH}metrics/commenter_network_metricstest.csv")
 
 def save_community_metrics(G: nx.Graph, communities):
     print(f"calculating community metrics ...")
@@ -37,7 +37,7 @@ def save_community_metrics(G: nx.Graph, communities):
 
     df = pd.DataFrame(metrics)
     os.makedirs(f"{CURR_PATH}metrics/", exist_ok=True)
-    df.to_csv(f"{CURR_PATH}metrics/commenter_network_community_metrics.csv")
+    df.to_csv(f"{CURR_PATH}metrics/commenter_network_community_metricstest.csv")
 
 def save_clique_metrics(G: nx.Graph):
     print(f"calculating clique metrics ...")
@@ -46,7 +46,7 @@ def save_clique_metrics(G: nx.Graph):
     
     df = pd.DataFrame([metrics])
     os.makedirs(f"{CURR_PATH}metrics/", exist_ok=True)
-    df.to_csv(f"{CURR_PATH}metrics/commenter_network_clique_metrics.csv")
+    df.to_csv(f"{CURR_PATH}metrics/commenter_network_clique_metricstest.csv")
 
 
 def build_networks():
@@ -91,36 +91,22 @@ def community_metrics(path, save_metrics=True, plot=True):
                 })
 
         comm_map_df = pd.DataFrame(comm_map)
-        comm_map_df.to_csv(f"{CURR_PATH}metrics/communities.csv", index=False)
+        comm_map_df.to_csv(f"{CURR_PATH}metrics/communitiestest.csv", index=False)
 
 
     if plot:
-        # todo: legenda com index de cada comunidade
         plot_communities(G, communities)
         # plot_community_graph(G, communities,res=res,
         #                      path=path.replace(CURR_PATH,"").replace(".pickle","").replace("/",""))
 
-
-"""
-If your input graph edge weights for self-loops do not represent already reduced communities you 
-may want to remove the self-loops before inputting that graph
-
-- Modularity
-- Conductance
-- Community Size
-- Density
-- https://github.com/cjhutto/vaderSentiment
-
-"""
-
 def main():
-    co_commenter_path = f'{CURR_PATH}/co_commenter_network.pickle'
-    co_commenter_ftr_path = f'{CURR_PATH}/co_commenter_network_filtered.pickle'
+    # co_commenter_path = f'{CURR_PATH}/co_commenter_network.pickle'
+    # co_commenter_ftr_path = f'{CURR_PATH}/co_commenter_network_filtered.pickle'
     co_commenter_nsl_path = f'{CURR_PATH}/co_commenter_network_filtered_noselfloop.pickle'
 
     print(f"current youtuber: {CURR_YTBR}")
 
-    community_metrics(co_commenter_nsl_path, save_metrics=True, plot=True)
+    community_metrics(co_commenter_nsl_path, save_metrics=True, plot=False)
 
 
 

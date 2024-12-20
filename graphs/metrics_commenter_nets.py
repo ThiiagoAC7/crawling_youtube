@@ -178,7 +178,7 @@ def calc_louvain_communities(G: nx.Graph, resolution=1):
     communities = nx.community.louvain_communities(G,
                                                    weight='weight',
                                                    resolution=resolution,
-                                                   seed=42,
+                                                   # seed=42,
                                                    )
     return communities
 

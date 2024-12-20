@@ -177,16 +177,7 @@ def plot_communities(G, communities):
     print(f"edges drawn in {end - start: .4f} seconds")
 
 
-    # Add community labels
-    # for i, community in enumerate(communities):
-    #     x_coords = [pos[node][0] for node in community if node in pos]
-    #     y_coords = [pos[node][1] for node in community if node in pos]
-    #     if x_coords and y_coords:
-    #         centroid_x = sum(x_coords) / len(x_coords)
-    #         centroid_y = sum(y_coords) / len(y_coords)
-    #         plt.text(centroid_x, centroid_y, f"{i}", fontsize=12, ha='left', va='top', color='black')
-
-
+    # add community labels
     for idx, community in enumerate(communities):
         # Calculate the centroid of the community to place the label
         x_coords = [pos[node][0] for node in community if node in pos]
@@ -200,9 +191,9 @@ def plot_communities(G, communities):
     legend_elements = [Line2D([0], [0], marker='o', color='w', label=f'Community {i}',
                               markerfacecolor=color, markersize=10)
                        for i, color in enumerate(colors.values())]
-    plt.legend(handles=legend_elements, loc='upper right', title="Communities", fontsize=10, title_fontsize='13')
+    plt.legend(handles=legend_elements, loc='upper right', title="Communities", fontsize=15, title_fontsize='13')
 
-    plt.title("Communities")
+    # plt.title("Communities")
     os.makedirs(f"{CURR_PATH}imgs/", exist_ok=True)
-    plt.savefig(f"{CURR_PATH}imgs/testeplotcommunities.png")
-    print(f"{CURR_PATH}imgs/testeplotcommunities.png")
+    plt.savefig(f"{CURR_PATH}imgs/testeplotcommunitiesfinal.png")
+    print(f"{CURR_PATH}imgs/testeplotcommunitiesfinal.png")
